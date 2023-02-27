@@ -6,8 +6,8 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 const port = process.env.PORT || 8080;
 const io = new Server(server, {
-  cors: "*",
-  methods: "*",
+  origins: ["http://localhost:3000", "https://refurbished-store.netlify.app"],
+  methods: ["GET", "POST", "PATCH", "DELETE"],
 });
 
 //importing routes
@@ -25,7 +25,9 @@ connection();
 
 app.use(
   cors({
-    origin: "*",
+    origin: ["http://localhost:3000", "https://refurbished-store.netlify.app"],
+    methods: ["GET", "POST", "PATCH", "DELETE"],
+    credentials: true,
   })
 );
 app.use(express.urlencoded({ extended: true }));
