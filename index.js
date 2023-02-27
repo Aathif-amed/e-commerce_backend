@@ -6,7 +6,7 @@ const { Server } = require("socket.io");
 const cors = require("cors");
 const port = process.env.PORT || 8080;
 const io = new Server(server, {
-  origins: "*",
+  cors: "https://refurbished-store.netlify.app",
   methods: ["GET", "POST", "PATCH", "DELETE"],
 });
 
@@ -25,7 +25,7 @@ connection();
 
 app.use(
   cors({
-    origin: "*",
+    origin: "https://refurbished-store.netlify.app",
     methods: ["GET", "POST", "PATCH", "DELETE"],
     credentials: true,
   })
