@@ -13,7 +13,7 @@ const io = new Server(server, {
 //importing routes
 const userRoute = require("./routes/userRoutes");
 const productRoute = require("./routes/productRoutes");
-// const orderRoute = require("./routes/orderRoutes");
+const orderRoute = require("./routes/orderRoutes");
 const imageRoute = require("./routes/imageRoutes");
 
 const dotenv = require("dotenv");
@@ -29,14 +29,17 @@ app.use(express.json({ limit: "10mb" }));
 
 //routes
 
-app.use("/api/auth", userRoute);
+app.use("/api/user", userRoute);
 app.use("/api/product", productRoute);
-// app.use("/api/order", orderRoute);
+app.use("/api/order", orderRoute);
 app.use("/api/images", imageRoute);
 
 app.get("/", (req, res) => {
   res.send("Welcome to E-commerce Backend");
 });
+
+//socket-io
+app.set("socketio", io);
 
 server.listen(port, () => {
   console.log(`Server is listening on Port:${port}`);

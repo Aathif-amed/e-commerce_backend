@@ -17,7 +17,8 @@ router.post("/createProduct", authenticate, async (req, res) => {
   try {
     //to check the user whether he is a actual admin by comparing the value from the decodedToken and in the database
     const adminUser = await User.findOne({ email: req.user.email });
-    if (req.user.isAdmin === adminUser.isAdmin) {
+
+    if (req.user.isAdmin && adminUser.isAdmin) {
       const { name, description, price, category, images: pictures } = req.body;
       const productPrice = Number(price);
       const product = await Product.create({
@@ -44,7 +45,7 @@ router.patch("/updateProduct/:id", authenticate, async (req, res) => {
   try {
     //to check the user whether he is a actual admin by comparing the value from the decodedToken and in the database
     const adminUser = await User.findOne({ email: req.user.email });
-    if (req.user.isAdmin === adminUser.isAdmin) {
+    if (req.user.isAdmin && adminUser.isAdmin) {
       const { name, description, price, category, images: pictures } = req.body;
       const product = await Product.findByIdAndUpdate(id, {
         name,
@@ -70,7 +71,7 @@ router.delete("/deleteProduct/:id", authenticate, async (req, res) => {
   try {
     //to check the user whether he is a actual admin by comparing the value from the decodedToken and in the database
     const adminUser = await User.findOne({ email: req.user.email });
-    if (req.user.isAdmin === adminUser.isAdmin) {
+    if (req.user.isAdmin && adminUser.isAdmin) {
       await Product.findByIdAndDelete(id);
       const products = await Product.find();
       return res.status(200).json(products);
@@ -113,8 +114,7 @@ router.get("/category/:category", async (req, res) => {
 
 router.post("/addToCart", authenticate, async (req, res) => {
   const { userId, productId, price } = req.body;
-  console.log(price);
-  console.log(req.body);
+
   try {
     const user = await User.findById(userId);
     const userCart = user.cart;
@@ -125,11 +125,11 @@ router.post("/addToCart", authenticate, async (req, res) => {
     }
     userCart.count += 1;
     userCart.total = Number(userCart.total) + Number(price);
-    console.log(userCart);
     user.cart = userCart;
+
     user.markModified("cart");
     await user.save();
-    return res.status(200).json(user);
+    return res.status(200).json({ ...user._doc, token: req.user.token });
   } catch (error) {
     return res.status(400).send(error.message);
   }
@@ -144,9 +144,10 @@ router.post("/increaseCart", authenticate, async (req, res) => {
     userCart.count += 1;
     userCart[productId] += 1;
     user.cart = userCart;
+
     user.markModified("cart");
     await user.save();
-    return res.status(200).json(user);
+    return res.status(200).json({ ...user._doc, token: req.user.token });
   } catch (error) {
     return res.status(400).send(error.message);
   }
@@ -161,17 +162,16 @@ router.post("/decreaseCart", authenticate, async (req, res) => {
     userCart.count -= 1;
     userCart[productId] -= 1;
     user.cart = userCart;
+
     user.markModified("cart");
     await user.save();
-    return res.status(200).json(user);
+    return res.status(200).json({ ...user._doc, token: req.user.token });
   } catch (error) {
     return res.status(400).send(error.message);
   }
 });
 
 router.post("/removeFromCart", authenticate, async (req, res) => {
-  console.log("a");
-  console.log(req.body);
   const { userId, productId, price } = req.body;
   try {
     const user = await User.findById(userId);
@@ -182,7 +182,7 @@ router.post("/removeFromCart", authenticate, async (req, res) => {
     user.cart = userCart;
     user.markModified("cart");
     await user.save();
-    return res.status(200).json(user);
+    return res.status(200).json({ ...user._doc, token: req.user.token });
   } catch (error) {
     return res.status(400).send(error.message);
   }

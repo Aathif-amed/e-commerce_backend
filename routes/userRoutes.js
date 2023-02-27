@@ -28,7 +28,7 @@ router.post("/register", async (req, res) => {
       }
       const emailTestResult = emailRegex.test(email);
       if (!emailTestResult) {
-        return res.status(400).json("Please Enter Valid E-Mail.");
+        return res.status(400).json("Please Enter Valid error-Mail.");
       }
       const passwordTestResult = passwordRegex.test(password);
       if (password.length < 6 || !passwordTestResult) {
@@ -95,9 +95,9 @@ router.post("/login", async (req, res) => {
 
       return res.status(200).json({ ...existingUser._doc, token: token });
     }
-  } catch (err) {
-    console.log(err);
-    return res.status(500).send(err);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send(error);
   }
 });
 
@@ -108,14 +108,40 @@ router.get("/", authenticate, async (req, res) => {
     //to check the user whether he is a actual admin by comparing the value from the decodedToken and in the database
     const adminUser = await User.findOne({ email: req.user.email });
     if (req.user.isAdmin === adminUser.isAdmin) {
-      const users = await User.find({ isAdmin: false });
-      // .populate("orders");
+      const users = await User.find({ isAdmin: false }).populate("orders");
       return res.status(200).json(users);
     } else {
       return res.status(401).send("Unauthorized Usage");
     }
-  } catch (e) {
-    return res.status(400).send(e.message);
+  } catch (error) {
+    return res.status(400).send(error.message);
+  }
+});
+
+// get user orders
+
+router.get("/:id/orders", authenticate, async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await User.findById(id).populate("orders");
+    return res.json(user.orders);
+  } catch (error) {
+    return res.status(400).send(error.message);
+  }
+});
+// update user notifcations
+router.post("/:id/updateNotifications", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await User.findById(id);
+    user.notifications.forEach((notif) => {
+      notif.status = "read";
+    });
+    user.markModified("notifications");
+    await user.save();
+    return res.status(200).send();
+  } catch (error) {
+    return res.status(400).send(error.message);
   }
 });
 
