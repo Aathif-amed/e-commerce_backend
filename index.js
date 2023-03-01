@@ -5,10 +5,6 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const cors = require("cors");
 const port = process.env.PORT || 8080;
-const io = new Server(server, {
-  cors: process.env.CLIENT_URL,
-  methods: ["GET", "POST", "PATCH", "DELETE"],
-});
 
 //importing routes
 const userRoute = require("./routes/userRoutes");
@@ -30,6 +26,10 @@ app.use(
     credentials: true,
   })
 );
+const io = new Server(server, {
+  cors: process.env.CLIENT_URL,
+  methods: ["GET", "POST", "PATCH", "DELETE"],
+});
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: "10mb" }));
 
